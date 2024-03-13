@@ -11,7 +11,6 @@ from PIL import Image
 from numpy import asarray, mean, array, blackman
 import numpy as np
 from numpy.fft import rfft
-import matplotlib.pyplot as plt
 
 try:
     # More accurate peak finding from
@@ -31,45 +30,29 @@ def rms_flat(a):
     return np.sqrt(np.mean(np.abs(a) ** 2))
 
 
-filename = 'Varpratap I797 (1).PDF'
+filename = 'VVImages/9.png'
 
 # Load file, converting to grayscale
-I = asarray(Image.open(filename).convert('L'))
+I = asarray(Image.open(filename))
 I = I - mean(I)  # Demean; make the brightness extend above and below zero
-plt.subplot(2, 2, 1)
-plt.imshow(I)
 
 # Do the radon transform and display the result
 sinogram = radon(I)
-
-plt.subplot(2, 2, 2)
-plt.imshow(sinogram.T, aspect='auto')
-plt.gray()
-
 # Find the RMS value of each row and find "busiest" rotation,
 # where the transform is lined up perfectly with the alternating dark
 # text and white lines
 r = array([rms_flat(line) for line in sinogram.transpose()])
 rotation = argmax(r)
 print('Rotation: {:.2f} degrees'.format(90 - rotation))
-plt.axhline(rotation, color='r')
 
 # Plot the busy row
 row = sinogram[:, rotation]
 N = len(row)
-plt.subplot(2, 2, 3)
-plt.plot(row)
 
 # Take spectrum of busy row and find line spacing
 window = blackman(N)
 spectrum = rfft(row * window)
-plt.plot(row * window)
+
 frequency = argmax(abs(spectrum))
 line_spacing = N / frequency  # pixels
 print('Line spacing: {:.2f} pixels'.format(line_spacing))
-
-plt.subplot(2, 2, 4)
-plt.plot(abs(spectrum))
-plt.axvline(frequency, color='r')
-plt.yscale('log')
-plt.show()

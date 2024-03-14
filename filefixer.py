@@ -1,12 +1,11 @@
 import numpy as np
 import cv2
 import pdf2image
-import os
 
 from skimage.transform import radon
 
 #pdf goes here
-filename = 'C:/Users/volpe/OneDrive/Desktop/Python/Varpratap I797 (1).PDF'
+filename = 'Varpratap I797 (1).PDF'
 
 # convert pdf to jpeg
 images = pdf2image.convert_from_path(filename)

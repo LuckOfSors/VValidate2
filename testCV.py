@@ -1,5 +1,11 @@
 import cv2
 import numpy as np
+import os
+import pytesseract
+from PIL import Image
+import re
+
+
 
 def sort_contours(cnts, method="left-to-right"):
     # initialize the reverse flag and sort index
@@ -89,12 +95,29 @@ def box_extraction(img_for_box_extraction_path, cropped_dir_path):
             new_img = img[y:y+h, x:x+w]
             cv2.imwrite(cropped_dir_path+str(idx) + '.png', new_img)
 
-    # For Debugging
-    # Enable this line to see all contours.
-    # cv2.drawContours(img, contours, -1, (0, 0, 255), 3)
-    # cv2.imwrite("./Temp/img_contour.jpg", img)
+def textChecker(directory, text_list):
+    """Delete image files in directory and its subdirectories that don't contain any of the specified strings of text."""
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            if filename.endswith('.png'):  # Adjust file extensions as needed
+                image_path = os.path.join(root, filename)
+                if not imageContainsText(image_path, text_list):
+                    os.remove(image_path)
+                    print(f"Deleted '{filename}' because it didn't contain any of the specified strings of text.")
 
-
-
+def imageContainsText(image_path, text_list):
+    # Check if an image file contains one of the specified strings of text.
+    extracted_text = pytesseract.image_to_string(Image.open(image_path))
+    pattern = r'[A-Z]{2}\s\d{5}'
+    for text in text_list:
+        if text in extracted_text or re.search(pattern, extracted_text):
+            print(f"Found '{text}' in '{image_path}'")
+            return True
+    return False
 #Input image path and out folder
-box_extraction("VVImages/rotated0.jpg", "./VVImages/")
+box_extraction("VVImages/rotated0.jpg", "./VVImages/BoxImages/")
+
+textList = ["Receipt Number", "Receipt", "Beneficiary", "Petitioner","Page", "Notice Date" "Case Type", "Date of Birth"]
+
+textChecker("./VVImages/BoxImages/", textList)
+

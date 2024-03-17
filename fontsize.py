@@ -25,6 +25,20 @@ for box in bounding_boxes.splitlines():
     box = box.split()
     font_size = abs(int(box[3]) - int(box[1]))  # Height of the bounding box
     font_sizes.append(font_size)
+#three parts of the standard deviation
+def mean(numbers):
+    return sum(numbers) / len(numbers)
+
+def variance(numbers):
+    mean_val = mean(numbers)
+    return sum((x - mean_val) ** 2 for x in numbers) / len(numbers)
+
+def standard_deviation(numbers):
+    return variance(numbers) ** 0.5
+
+# Calculate the standard deviation
+std_dev = standard_deviation(font_sizes)
+print("Standard deviation:", std_dev)
 
 # Calculate the average font size
 if font_sizes:

@@ -41,11 +41,16 @@ def calculate_std_font_size(image_paths):
                 font_sizes.append(font_size)
 
         # Calculate the standard deviation font size for this image
+        
+        print(font_sizes)
+        print(total_font_sizes)
+        
         if font_sizes:
-            std_dev = standard_deviation(font_sizes)
-            total_font_sizes.append(std_dev)
+            mn = mean(font_sizes)
+            total_font_sizes.append(mn)
         else:
             print(f"No text detected in {image_path}.")
+        
 
 
     # Calculate the overall average font size across all images
@@ -57,7 +62,7 @@ def calculate_std_font_size(image_paths):
         return None
 
 # List of image paths
-image_paths = ['Practice_font_img.png', 'Practice_font_img.png']
+image_paths = ['/Users/kaliyahsolomon/VValidate2/VVImages/BoxImages/3.png', '/Users/kaliyahsolomon/VValidate2/VVImages/BoxImages/6.png', '/Users/kaliyahsolomon/VValidate2/VVImages/BoxImages/9.png']
 
 # Calculate average font size for all images
 std_font_size = calculate_std_font_size(image_paths)

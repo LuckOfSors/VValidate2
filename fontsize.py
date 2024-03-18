@@ -1,6 +1,8 @@
 import cv2
 import pytesseract
 import os
+from PIL import Image
+import re
 
 #three parts of the standard deviation
 def mean(numbers):
@@ -42,14 +44,15 @@ def calculate_std_font_size(image_paths):
 
         # Calculate the standard deviation font size for this image
         
-        print(font_sizes)
-        print(total_font_sizes)
+    
+        
         
         if font_sizes:
             mn = mean(font_sizes)
             total_font_sizes.append(mn)
         else:
             print(f"No text detected in {image_path}.")
+    print(total_font_sizes)
         
 
 
@@ -61,58 +64,67 @@ def calculate_std_font_size(image_paths):
         print("No text detected in any image.")
         return None
 
+def std2_font_size(image_paths):
+    for image_path in image_paths:
+        # Read the image using OpenCV
+        image = cv2.imread(image_path)
+        
+        # Convert the image to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # Use pytesseract to do OCR on the image
+        text_data = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
+
+        # Extract font size information from text lines
+        font_sizes = []
+
+        for i, text in enumerate(text_data['text']):
+            # Skip empty text
+            if text.strip():
+                # Extract bounding box coordinates
+                x, y, w, h = text_data['left'][i], text_data['top'][i], text_data['width'][i], text_data['height'][i]
+
+                # Estimate font size based on bounding box height
+                font_size = h
+                font_sizes.append(font_size)
+
+        # Calculate the standard deviation
+        std_dev = standard_deviation(font_sizes)
+        return std_dev
+
 # List of image paths
-image_paths = ['/Users/kaliyahsolomon/VValidate2/VVImages/BoxImages/3.png', '/Users/kaliyahsolomon/VValidate2/VVImages/BoxImages/6.png', '/Users/kaliyahsolomon/VValidate2/VVImages/BoxImages/9.png']
 
-# Calculate average font size for all images
-std_font_size = calculate_std_font_size(image_paths)
+def textChecker(directory, text_list):
+    image_paths = []
+    """Delete image files in directory and its subdirectories that don't contain any of the specified strings of text."""
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            if filename.endswith('.png'):  # Adjust file extensions as needed
+                image_path = os.path.join(root, filename)
+                if imageContainsText(image_path, text_list):
+                    image_paths.append(image_path)
+    #return image_paths
+    length = len(image_paths)
+    if length > 1:
+        std_font_size = calculate_std_font_size(image_paths)
+        print("Standard deviation of more than one image", std_font_size)
+    else:
+        std_font_size = std2_font_size(image_paths)
+        print("Standard deviation of one image", std_font_size)
 
-print(std_font_size)
 
-'''
-# Path to the image file
-image_path = 'image.jpg'
+def imageContainsText(image_path, text_list):
+    # Check if an image file contains one of the specified strings of text.
+    extracted_text = pytesseract.image_to_string(Image.open(image_path))
+        
+    for text in text_list:
+        if text in extracted_text:
+            return True
+        return False
+#Input image path and out folder
 
-# Read the image using OpenCV
-image = cv2.imread(image_path)
+textList = ["Receipt Number", "Receipt", "Beneficiary", "Petitioner","Page", "Notice Date" "Case Type"]
+textChecker ("./VVImages/BoxImages", textList)
+#textList2 = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",  "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR","PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+#textChecker ("./VVImages/BoxImages", textList2)
 
-# Convert the image to grayscale
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-# Use pytesseract to do OCR on the image
-text = pytesseract.image_to_string(gray)
-
-# Split the text into lines
-lines = text.split('\n')
-
-# Calculate the bounding box of the detected text
-bounding_boxes = pytesseract.image_to_boxes(gray)
-
-# Extract font size information from bounding boxes
-font_sizes = []
-for box in bounding_boxes.splitlines():
-    box = box.split()
-    font_size = abs(int(box[3]) - int(box[1]))  # Height of the bounding box
-    font_sizes.append(font_size)
-#three parts of the standard deviation
-def mean(numbers):
-    return sum(numbers) / len(numbers)
-
-def variance(numbers):
-    mean_val = mean(numbers)
-    return sum((x - mean_val) ** 2 for x in numbers) / len(numbers)
-
-def standard_deviation(numbers):
-    return variance(numbers) ** 0.5
-
-# Calculate the standard deviation
-std_dev = standard_deviation(font_sizes)
-print("Standard deviation:", std_dev)
-
-# Calculate the average font size
-if font_sizes:
-    average_font_size = sum(font_sizes) / len(font_sizes)
-    print("Average font size:", average_font_size)
-else:
-    print("No text detected.")
-'''

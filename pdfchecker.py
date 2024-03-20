@@ -3,12 +3,12 @@ import cv2
 import pdf2image
 import os
 import pytesseract
-from PIL import Image
 import re
 from skimage.transform import radon
 from PIL import Image
 from numpy import asarray, mean, array, blackman
 from numpy.fft import rfft
+import math
 try:
     from parabolic import parabolic
 
@@ -21,6 +21,8 @@ class PDFChecker:
     def __init__(self, pdfPath):
         self.pdfPath = pdfPath
         self.images = pdf2image.convert_from_path(self.pdfPath)
+        self.topImages = []
+        self.bottomImages = []
         self.rotatePdf(self.images)
         self.box_extraction("VVImages/rotated0.jpg", "./VVImages/BoxImages/")
 
@@ -31,6 +33,9 @@ class PDFChecker:
         for root, dirs, files in os.walk("./VVImages/BoxImages/"):
             for filename in files:
                 image_path = os.path.join(root, filename)
+                self.angleOfText(image_path)
+        self.runStd(["./VVImages/BoxImages/9.png", "./VVImages/BoxImages/12.png"])
+        
                 
 
 
@@ -39,7 +44,6 @@ class PDFChecker:
             img.save('VVImages/output'+str(x)+'.jpg', 'JPEG')
             # load file, converting to grayscale
             img = cv2.imread('VVImages/output'+str(x)+'.jpg')
-            print(img.shape)
             I = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             h, w = I.shape
             # resize image to reduce processing time
@@ -87,16 +91,16 @@ class PDFChecker:
         #Functon for extracting the box
     def box_extraction(self, img_for_box_extraction_path, cropped_dir_path):
 
-        print("Reading image..")
+ 
         img = cv2.imread(img_for_box_extraction_path, 0)  # Read the image
         (thresh, img_bin) = cv2.threshold(img, 128, 255,
                                         cv2.THRESH_BINARY | cv2.THRESH_OTSU)  # Thresholding the image
         img_bin = 255-img_bin  # Invert the image
 
-        print("Storing binary image to Images/Image_bin.jpg..")
+ 
         cv2.imwrite("Images/Image_bin.jpg",img_bin)
 
-        print("Applying Morphological Operations..")
+ 
         # Defining a kernel length
         kernel_length = np.array(img).shape[1]//40
         
@@ -132,7 +136,7 @@ class PDFChecker:
         # Sort all the contours by top to bottom.
         (contours, boundingBoxes) = self.sort_contours(contours, method="top-to-bottom")
 
-        print("Output stored in Output directiory!")
+
 
         idx = 0
         for c in contours:
@@ -160,6 +164,8 @@ class PDFChecker:
         pattern = r'[A-Z]{2}\s\d{5}'
         for text in text_list:
             if text in extracted_text:
+                if text != "Date of Birth":
+                    self.topImages.append(image_path)
                 return True
             if re.search(pattern, extracted_text):
                 return True
@@ -234,7 +240,6 @@ class PDFChecker:
                 total_font_sizes.append(mn)
             else:
                 print(f"No text detected in {image_path}.")
-        print(total_font_sizes)
             
 
 
@@ -273,8 +278,74 @@ class PDFChecker:
             # Calculate the standard deviation
             std_dev = self.standard_deviation(font_sizes)
             return std_dev
-        
+    def runStd(self, image_paths):
+        length = len(self.topImages)
+        if length > 1:
+            std_font_size = self.calculate_std_font_size(self.topImages)
+            print("Standard deviation of more than one image", std_font_size)
+        else:
+            std_font_size = self.std2_font_size(image_paths)
+            print("Standard deviation of one image", std_font_size)
+    
 
+    def angleOfText(self, filePath):
+        img = cv2.imread(filePath)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # threshold
+        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+
+        # invert
+        thresh = 255 - thresh
+
+        # apply horizontal morphology close
+        kernel = np.ones((5 ,191), np.uint8)
+        morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
+        # get external contours
+        contours = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = contours[0] if len(contours) == 2 else contours[1]
+
+        # draw contours
+        coords = []
+        coordsList = []
+        result = img.copy()
+        for cntr in contours:
+            # get bounding boxes
+            pad = 10
+            x,y,w,h = cv2.boundingRect(cntr)
+            cv2.rectangle(result, (x-pad, y-pad), (x+w+pad, y+h+pad), (0, 0, 255), 4)
+            coords.append((x,y))
+            coords.append((x+w,y))
+            coords.append((x+w, y+h))
+            coords.append((x,y+h))
+            coordsList.append(coords)
+        print("for file:", filePath)
+        for rects in coordsList:
+            print(self.angle_of_rectangle(rects))
+
+    def angle_of_rectangle(self, rectangle):
+        # Assuming rectangle is a list of points [(x1, y1), (x2, y2), ...]
+        
+        # Find the length of each side of the rectangle
+        side_lengths = [((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2) for p1, p2 in zip(rectangle, rectangle[1:] + rectangle[:1])]
+        
+        # Find the index of the longest side
+        longest_side_index = side_lengths.index(max(side_lengths))
+        
+        # Get the two endpoints of the longest side
+        point1 = rectangle[longest_side_index]
+        point2 = rectangle[(longest_side_index + 1) % len(rectangle)]  # Wrap around to the start if needed
+        
+        # Calculate the vector representing the longer side
+        vector_x = point2[0] - point1[0]
+        vector_y = point2[1] - point1[1]
+        
+        # Calculate the angle between the vector and the x-axis
+        angle_rad = math.atan2(vector_y, vector_x)
+        angle_deg = math.degrees(angle_rad)
+        
+        return angle_deg
 def main():
     filename = 'Varpratap I797 (1).PDF'
     pdfChecker = PDFChecker(filename)

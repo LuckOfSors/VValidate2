@@ -95,13 +95,10 @@ def textChecker(directory, text_list):
     for root, dirs, files in os.walk(directory):
         for filename in files:
             image_path = os.path.join(root, filename)
-            print(image_path)
             if imageContainsText(image_path, text_list):
                 image_paths.append(image_path)
     #return image_paths
-    print("Image paths", image_paths)
     length = len(image_paths)
-    print("Number of images", length)
     if length > 1:
         std_font_size = calculate_std_font_size(image_paths)
         print("Standard deviation of more than one image", std_font_size)
@@ -113,11 +110,8 @@ def textChecker(directory, text_list):
 def imageContainsText(image_path, text_list):
     # Check if an image file contains one of the specified strings of text.
     extracted_text = pytesseract.image_to_string(Image.open(image_path))
-    print(text_list)
     for text in text_list:
-        print(text)
         if text in extracted_text:
-            print(f"Found '{text}' in '{image_path}'")
             return True
     return False
 #Input image path and out folder
@@ -126,4 +120,3 @@ textList = ["Receipt Number", "Receipt", "Beneficiary", "Petitioner","Page", "No
 textChecker ("./VVImages/BoxImages", textList)
 textList2 = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",  "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR","PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 textChecker ("./VVImages/BoxImages", textList2)
-

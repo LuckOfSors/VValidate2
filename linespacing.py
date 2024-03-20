@@ -13,8 +13,6 @@ import numpy as np
 from numpy.fft import rfft
 
 try:
-    # More accurate peak finding from
-    # https://gist.github.com/endolith/255291#file-parabolic-py
     from parabolic import parabolic
 
     def argmax(x):

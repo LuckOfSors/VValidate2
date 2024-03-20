@@ -32,7 +32,6 @@ for i, contour in enumerate(filtered_contours):
     
     # Extract individual character
     character = gray[y:y+h, x:x+w]
-    
     # Save character image
     cv2.imwrite('./SeperatedChar/' + f'character_{i}.png', character)
     

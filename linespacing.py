@@ -30,7 +30,7 @@ def rms_flat(a):
     return np.sqrt(np.mean(np.abs(a) ** 2))
 
 
-filename = 'VVImages/9.png'
+filename = 'VVImages/BoxImages/9.png'
 
 # Load file, converting to grayscale
 I = asarray(Image.open(filename))

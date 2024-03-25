@@ -30,11 +30,9 @@ extracted_text = pytesseract.image_to_string(gray)
 
 # Find the word after specific words from the list in the extracted text
 word_after_specific_words = find_word_after_specific_words(extracted_text, specific_words_to_search)
+print(word_after_specific_words)
 
-# Print the word after each specific word found
-for word, next_word in word_after_specific_words.items():
-    print(f"The word after '{word}' is '{next_word}'")
-
+'''
 def count_word_occurrences(extracted_text, word_list):
     word_counts = {word: 0 for word in word_list}  # Initialize counts to 0 for each word in the list
     
@@ -52,8 +50,6 @@ word_occurrences = count_word_occurrences(extracted_text, word_after_specific_wo
 
 def compare_lists(list1, list2):
     # Ensure both lists have the same length
-    if len(list1) != len(list2):
-        raise ValueError("Lists must have the same length")
     
     # Create a new list to store comparison results
     comparison_result = []
@@ -72,3 +68,4 @@ result = compare_lists(word_occurrences, list2)
 
 # Print the result
 print("Comparison result:", result)
+'''

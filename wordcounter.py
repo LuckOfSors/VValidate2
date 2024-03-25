@@ -4,12 +4,12 @@ import pytesseract
 # Function to find the word after specific words from a list in the extracted text
 def find_word_after_specific_words(extracted_text, specific_words):
     words = extracted_text.split()
-    word_after_specific_words = {}
+    word_after_specific_words = []
     
     for i, word in enumerate(words):
-        if word.lower() in specific_words and i < len(words) - 1:
+        if word in specific_words and i < len(words):
             next_word = words[i + 1]
-            word_after_specific_words[word.lower()] = next_word.lower()
+            word_after_specific_words.append(next_word)
     
     return word_after_specific_words
 
@@ -17,7 +17,7 @@ def find_word_after_specific_words(extracted_text, specific_words):
 image_path = 'VVImages/rotated0.jpg'
 
 # List of specific words to search for
-specific_words_to_search = ['Receipt Number', 'Name', 'Petitioner']  # Example list
+specific_words_to_search = ['Number', 'NAME', 'Petitioner']  # Example list
 
 # Read the image using OpenCV
 image = cv2.imread(image_path)
@@ -32,7 +32,7 @@ extracted_text = pytesseract.image_to_string(gray)
 word_after_specific_words = find_word_after_specific_words(extracted_text, specific_words_to_search)
 print(word_after_specific_words)
 
-'''
+
 def count_word_occurrences(extracted_text, word_list):
     word_counts = {word: 0 for word in word_list}  # Initialize counts to 0 for each word in the list
     
@@ -41,12 +41,13 @@ def count_word_occurrences(extracted_text, word_list):
     
     # Count the occurrences of each word from the list
     for word in words:
-        if word.lower() in word_counts:
-            word_counts[word.lower()] += 1
+        if word in word_counts:
+            word_counts[word] += 1
     
     return list(word_counts.values())
 
 word_occurrences = count_word_occurrences(extracted_text, word_after_specific_words)
+print(word_occurrences)
 
 def compare_lists(list1, list2):
     # Ensure both lists have the same length
@@ -61,11 +62,10 @@ def compare_lists(list1, list2):
     return comparison_result
 
 # Example lists
-list2 = [3, 3, 4]  
+list2 = [4, 3, 3]  
 
 # Compare the lists
 result = compare_lists(word_occurrences, list2)
 
 # Print the result
 print("Comparison result:", result)
-'''

@@ -13,25 +13,20 @@ def find_word_after_specific_words(extracted_text, specific_words):
     
     return word_after_specific_words
 
-# Path to the image file
-image_path = 'VVImages/rotated0.jpg'
+def word_to_phrase(list):
+    lines = extracted_text.split('\n')
 
-# List of specific words to search for
-specific_words_to_search = ['Number', 'NAME', 'Petitioner']  # Example list
+    # Find the line starting with "TECH"
+    desired_line = None
+    for value in word_after_specific_words:
+        for line in lines:
+            if line.strip().startswith(value):
+                desired_line = line.strip()
+                break
 
-# Read the image using OpenCV
-image = cv2.imread(image_path)
+    modified_string = desired_line.replace(',', '')
 
-# Convert the image to grayscale
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-# Use pytesseract to extract text from the image
-extracted_text = pytesseract.image_to_string(gray)
-
-# Find the word after specific words from the list in the extracted text
-word_after_specific_words = find_word_after_specific_words(extracted_text, specific_words_to_search)
-print(word_after_specific_words)
-
+    return modified_string
 
 def count_word_occurrences(extracted_text, word_list):
     word_counts = {word: 0 for word in word_list}  # Initialize counts to 0 for each word in the list
@@ -46,8 +41,9 @@ def count_word_occurrences(extracted_text, word_list):
     
     return list(word_counts.values())
 
-word_occurrences = count_word_occurrences(extracted_text, word_after_specific_words)
-print(word_occurrences)
+def count_phrase_occurrences(text, phrase):
+    return text.count(phrase)
+
 
 def compare_lists(list1, list2):
     # Ensure both lists have the same length
@@ -61,11 +57,52 @@ def compare_lists(list1, list2):
     
     return comparison_result
 
-# Example lists
-list2 = [4, 3, 3]  
+# Path to the image file
+image_path = 'VVImages/rotated0.jpg'
+
+# List of specific words to search for
+specific_words_to_search = ['NAME', 'Petitioner']  # Example list
+
+# Read the image using OpenCV
+image = cv2.imread(image_path)
+
+# Convert the image to grayscale
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Use pytesseract to extract text from the image
+extracted_text = pytesseract.image_to_string(gray)
+
+# Find the word after specific words from the list in the extracted text
+word_after_specific_words = find_word_after_specific_words(extracted_text, specific_words_to_search)
+print(word_after_specific_words)
+
+#turn words to Phrases
+phrases = word_to_phrase(word_after_specific_words)
+print(phrases)
+
+#Make it one List
+word_after_specific_words[0] = phrases
+print(word_after_specific_words)
+
+# Count word occurences
+word_occurrences = count_word_occurrences(extracted_text, word_after_specific_words)
+print(word_occurrences)
+
+# Count phrase occurences
+phrase_occurrences = count_phrase_occurrences(extracted_text, phrases)
+print(phrase_occurrences)
+
+#Make it one list
+word_occurrences[0] = phrase_occurrences
+print(word_occurrences)
+
+# Base lists
+list2 = [4, 3]  
 
 # Compare the lists
 result = compare_lists(word_occurrences, list2)
 
 # Print the result
 print("Comparison result:", result)
+   
+

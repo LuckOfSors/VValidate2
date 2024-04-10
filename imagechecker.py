@@ -63,7 +63,7 @@ def analyze_text_regions(boxes):
         top_margin_deviation = np.std(region_tops)
         
         # Check consistency of font size (heights) within the region
-        font_height_deviation = np.std(region_heights)        
+        font_height_deviation = np.std(region_heights)
 
         # Overall consistency check for the region
         region_consistencies[i] = (left_margin_deviation < 5) and (top_margin_deviation < 5) and (font_height_deviation < 5)
@@ -74,7 +74,7 @@ def analyze_text_regions(boxes):
     return overall_consistency
 
 def main():
-    image_path = "output0.jpg"  # Replace this with the path to your image
+    image_path = "output0.png" 
     boxes = detect_text(image_path)
     is_consistent = analyze_text_regions(boxes)
     if is_consistent:

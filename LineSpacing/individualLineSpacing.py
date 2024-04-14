@@ -72,4 +72,4 @@ if __name__ == "__main__":
     # Plot and save distances as a bar chart
     pos_nos = [num for num in distances if num >= 0]
  
-    print("Positive numbers in the list: ", *pos_nos)
+    print("Line Spacing: ", *pos_nos)

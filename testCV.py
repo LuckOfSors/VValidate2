@@ -6,6 +6,7 @@ from PIL import Image
 import re
 
 
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def sort_contours(cnts, method="left-to-right"):
     # initialize the reverse flag and sort index

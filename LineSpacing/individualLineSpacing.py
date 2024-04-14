@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # Calculate vertical distances between text lines
     distances = calculate_distances(text_boxes)
     
-    # Plot and save distances as a bar chart
+    # Print individual line spacing
     pos_nos = [num for num in distances if num >= 0]
  
     print("Line Spacing: ", *pos_nos)

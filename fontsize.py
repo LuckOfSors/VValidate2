@@ -15,8 +15,19 @@ def variance(numbers):
 def standard_deviation(numbers):
     return variance(numbers) ** 0.5
 
+def find_word_after_specific_words(extracted_text, specific_words):
+    words = extracted_text
+    word_after_specific_words = {}
+    
+    for i, word in enumerate(words):
+        if word.lower() in specific_words and i < len(words) - 1:
+            next_word = words[i + 1]
+            word_after_specific_words[word.lower()] = next_word.lower()
+    
+    return word_after_specific_words
 
-def calculate_std_font_size(image_paths):
+
+def calculate_std_font_size(image_paths, text_list):
     total_font_sizes = []
     
     for image_path in image_paths:
@@ -29,10 +40,11 @@ def calculate_std_font_size(image_paths):
         # Use pytesseract to do OCR on the image
         text_data = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
 
+        correct_text = find_word_after_specific_words(text_data, text_list)
         # Extract font size information from text lines
         font_sizes = []
 
-        for i, text in enumerate(text_data['text']):
+        for i, text in enumerate(correct_text['text']):
             # Skip empty text
             if text.strip():
                 # Extract bounding box coordinates
@@ -100,7 +112,7 @@ def textChecker(directory, text_list):
     #return image_paths
     length = len(image_paths)
     if length > 1:
-        std_font_size = calculate_std_font_size(image_paths)
+        std_font_size = calculate_std_font_size(image_paths, text_list)
         print("Standard deviation of more than one image", std_font_size)
     else:
         std_font_size = std2_font_size(image_paths)
